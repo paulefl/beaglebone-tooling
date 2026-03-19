@@ -1,0 +1,40 @@
+name: Download beaglebone-tooling
+description: >
+  Downloads the beaglebone-tooling release tarball and extracts it into the
+  tooling/ directory. Requires GH_TOKEN / GITHUB_TOKEN in the calling job.
+
+inputs:
+  version:
+    description: >
+      Release tag to download (e.g. "v1.1.0").
+      Leave empty to download the latest release.
+    required: false
+    default: ''
+
+  dest:
+    description: Target directory for the extracted tooling files.
+    required: false
+    default: tooling
+
+runs:
+  using: composite
+  steps:
+    - name: Download & extract tooling
+      shell: bash
+      env:
+        GH_TOKEN: ${{ env.GH_TOKEN || env.GITHUB_TOKEN }}
+      run: |
+        mkdir -p "${{ inputs.dest }}"
+        if [ -n "${{ inputs.version }}" ]; then
+          gh release download "${{ inputs.version }}" \
+            --repo paulefl/beaglebone-tooling \
+            --pattern "tooling-*.tar.gz" \
+            --dir /tmp/tooling-dl
+        else
+          gh release download \
+            --repo paulefl/beaglebone-tooling \
+            --pattern "tooling-*.tar.gz" \
+            --dir /tmp/tooling-dl
+        fi
+        tar xf /tmp/tooling-dl/tooling-*.tar.gz -C "${{ inputs.dest }}"
+        chmod +x "${{ inputs.dest }}"/*.sh "${{ inputs.dest }}"/bausteinsicht
