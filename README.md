@@ -33,6 +33,12 @@ Das Tooling wird via GitHub Releases eingebunden:
 - tar xf tooling-v*.tar.gz
 ```
 
+## SonarCloud Quality Metrics
+
+Das Projekt nutzt SonarCloud für kontinuierliches Quality-Tracking. Jeder CI-Lauf erzeugt automatisch einen Snapshot (Coverage, Bugs, Technical Debt, Quality Gate).
+
+→ Vollständige Dokumentation: [docs/sonarcloud-trend.md](docs/sonarcloud-trend.md)
+
 ## Release erstellen
 
 ```bash
