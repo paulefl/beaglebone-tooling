@@ -42,7 +42,7 @@ jobs:
       - name: Build tooling archive
         run: |
           VERSION="${{ github.event.release.tag_name }}"
-          ARCHIVE="tooling-${VERSION}.tar.gz"
+          ARCHIVE="/tmp/tooling-${VERSION}.tar.gz"
           tar czf "$ARCHIVE" \
             --exclude='.git' \
             --exclude='.github' \
