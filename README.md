@@ -25,6 +25,29 @@ pip install pytest
 pytest tests/ -v
 ```
 
+## GitHub Actions (Composite Actions)
+
+### c-coverage — C Code Coverage mit gcov/lcov
+
+```yaml
+- name: Build c-lib with coverage
+  run: make -C c-lib coverage CC=gcc
+
+- name: Run C tests
+  run: make -C c-lib test
+
+- uses: paulefl/beaglebone-tooling/.github/actions/c-coverage@main
+  with:
+    source-dir: c-lib/
+    output-file: reports/c-coverage.info
+    filter-patterns: '/usr/*'   # optional, das ist der Default
+```
+
+Danach in `sonar-project.properties`:
+```properties
+sonar.c.lcov.reportPaths=reports/c-coverage.info
+```
+
 ## Verwendung im BeagleBone-Projekt
 
 Das Tooling wird via GitHub Releases eingebunden:
