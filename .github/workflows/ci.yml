@@ -30,6 +30,7 @@ jobs:
       - name: Shellcheck
         run: |
           shellcheck report.sh build_adoc.sh bausteinsicht-container.sh bausteinsicht.sh \
+            c_coverage.sh \
             || true  # Warnings are non-blocking
 
   release:
