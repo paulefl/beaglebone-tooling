@@ -1,0 +1,113 @@
+{
+  "projekt": "beaglebone-tooling",
+  "version": "1.0.0",
+  "beschreibung": "CI/CD Tooling für BeagleBone Black — Requirements-Traceability",
+  "kategorien": [
+    {
+      "name": "Report-Generierung",
+      "id": "TOOL-RPT",
+      "requirements": [
+        {
+          "id": "TOOL-RPT-001",
+          "titel": "Dashboard generieren",
+          "beschreibung": "generate_reports.py muss aus requirements.json und test_results.json ein HTML-Dashboard erzeugen.",
+          "prioritaet": "HOCH",
+          "status": "IMPLEMENTIERT",
+          "tests": ["test_generate_reports_creates_html", "test_generate_reports_empty_tests"],
+          "abdeckung": 90
+        },
+        {
+          "id": "TOOL-RPT-002",
+          "titel": "PDF-Report generieren",
+          "beschreibung": "generate_reports.py muss einen PDF-Report erzeugen.",
+          "prioritaet": "MITTEL",
+          "status": "IMPLEMENTIERT",
+          "tests": ["test_generate_reports_creates_pdf"],
+          "abdeckung": 80
+        },
+        {
+          "id": "TOOL-RPT-003",
+          "titel": "Kein ZeroDivisionError bei leeren Tests",
+          "beschreibung": "generate_reports.py darf bei total_tests=0 oder total_reqs=0 keinen ZeroDivisionError werfen.",
+          "prioritaet": "HOCH",
+          "status": "IMPLEMENTIERT",
+          "tests": ["test_generate_reports_empty_tests"],
+          "abdeckung": 95
+        }
+      ]
+    },
+    {
+      "name": "Testergebnis-Sammlung",
+      "id": "TOOL-COL",
+      "requirements": [
+        {
+          "id": "TOOL-COL-001",
+          "titel": "Go-Testergebnisse einlesen",
+          "beschreibung": "collect_results.py muss go test -json Ausgabe einlesen und in test_results.json schreiben.",
+          "prioritaet": "HOCH",
+          "status": "IMPLEMENTIERT",
+          "tests": ["test_collect_go_results"],
+          "abdeckung": 85
+        },
+        {
+          "id": "TOOL-COL-002",
+          "titel": "pytest-Ergebnisse einlesen",
+          "beschreibung": "collect_results.py muss pytest-json-report Ausgabe einlesen.",
+          "prioritaet": "HOCH",
+          "status": "IMPLEMENTIERT",
+          "tests": ["test_collect_pytest_results"],
+          "abdeckung": 85
+        },
+        {
+          "id": "TOOL-COL-003",
+          "titel": "Ausgabe in test_results.json",
+          "beschreibung": "collect_results.py muss die Ergebnisse im Format {test_ergebnisse: [...]} ausgeben.",
+          "prioritaet": "HOCH",
+          "status": "IMPLEMENTIERT",
+          "tests": ["test_collect_output_format"],
+          "abdeckung": 90
+        }
+      ]
+    },
+    {
+      "name": "SARIF-Konvertierung",
+      "id": "TOOL-SAR",
+      "requirements": [
+        {
+          "id": "TOOL-SAR-001",
+          "titel": "JUnit zu Sonar Generic",
+          "beschreibung": "junit_to_sonar_generic.py konvertiert JUnit XML nach Sonar Generic Test Format.",
+          "prioritaet": "MITTEL",
+          "status": "IMPLEMENTIERT",
+          "tests": ["test_junit_to_sonar_empty", "test_junit_to_sonar_with_failure"],
+          "abdeckung": 80
+        },
+        {
+          "id": "TOOL-SAR-002",
+          "titel": "Shellcheck zu SARIF",
+          "beschreibung": "shellcheck_to_sarif.py konvertiert shellcheck JSON-Output nach SARIF.",
+          "prioritaet": "MITTEL",
+          "status": "IMPLEMENTIERT",
+          "tests": ["test_shellcheck_to_sarif_empty", "test_shellcheck_to_sarif_finding"],
+          "abdeckung": 80
+        }
+      ]
+    },
+    {
+      "name": "Trend-Auswertung",
+      "id": "TOOL-TRD",
+      "requirements": [
+        {
+          "id": "TOOL-TRD-001",
+          "titel": "Trend-Daten schreiben",
+          "beschreibung": "trend_summary.py muss Testergebnis-Trend in test_trend.json schreiben.",
+          "prioritaet": "MITTEL",
+          "status": "IMPLEMENTIERT",
+          "tests": ["test_trend_summary_output"],
+          "abdeckung": 75
+        }
+      ]
+    }
+  ],
+  "test_ergebnisse": []
+}
