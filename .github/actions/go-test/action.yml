@@ -1,9 +1,10 @@
 name: Go Test Pipeline
 description: >
-  Full Go test pipeline: setup-go, download tooling, install report tools,
-  run tests with race detector + coverage, enforce quality gate, convert
-  reports (Cobertura, SonarQube Generic), upload Codecov and artifact.
-  Requires actions/checkout to have run in the calling job.
+  Full Go test pipeline: setup-go, install report tools, run tests with
+  race detector + coverage, enforce quality gate, convert reports
+  (Cobertura, SonarQube Generic), upload Codecov and artifact.
+  Requires actions/checkout and download-tooling to have run beforehand
+  (tooling/junit_to_sonar_generic.py must be present).
 
 inputs:
   go-version:
@@ -44,11 +45,6 @@ inputs:
     required: false
     default: go-reports
 
-  tooling-version:
-    description: beaglebone-tooling release tag to download (empty = latest).
-    required: false
-    default: ''
-
 runs:
   using: composite
   steps:
@@ -57,13 +53,6 @@ runs:
       with:
         go-version: ${{ inputs.go-version }}
         cache: true
-
-    - name: Download tooling
-      uses: paulefl/beaglebone-tooling/.github/actions/download-tooling@v1.1.0
-      env:
-        GH_TOKEN: ${{ env.GH_TOKEN || env.GITHUB_TOKEN }}
-      with:
-        version: ${{ inputs.tooling-version }}
 
     - name: Install report tools
       shell: bash
