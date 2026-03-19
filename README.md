@@ -15,6 +15,7 @@ CI/CD Tooling für das [BeagleBone Black](https://github.com/paulefl/beaglebone_
 | `req_tracing_summary.py` | Erzeugt Requirements-Traceability-Zusammenfassung |
 | `junit_to_sonar_generic.py` | Konvertiert JUnit XML → Sonar Generic Test Format |
 | `shellcheck_to_sarif.py` | Konvertiert shellcheck JSON → SARIF |
+| `c_coverage.sh` | C Code Coverage mit gcov/lcov → `.info`-Datei für SonarCloud |
 | `bausteinsicht` | Bausteinsicht-Diagramm-Generator (Binary) |
 
 ## Tests ausführen
