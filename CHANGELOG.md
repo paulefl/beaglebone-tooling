@@ -15,3 +15,5 @@ Format basiert auf [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 - `.github/actions/c-coverage`: GitHub Composite Action für C Coverage — kapselt lcov-Installation, Coverage-Generierung und Artefakt-Upload; verwendbar via `uses: paulefl/beaglebone-tooling/.github/actions/c-coverage@main`
 - `.github/actions/download-tooling`: GitHub Composite Action zum Herunterladen des Tooling-Releases — ersetzt 4× identischen Download-Block in beaglebone_black; unterstützt optionale Versionspinnung via `version`-Input
 - `.github/actions/go-test`: GitHub Composite Action für die vollständige Go-Test-Pipeline — kapselt setup-go, download-tooling, gotestsum, Coverage Quality Gate (75%), Cobertura-Konvertierung, JUnit→SonarQube, Codecov-Upload und Artefakt-Upload
+- `.github/actions/shellcheck-sarif`: GitHub Composite Action für Shell-Script-Qualität — bash -n Syntaxprüfung, ShellCheck JSON→SARIF via shellcheck_to_sarif.py und Artefakt-Upload
+- `.github/actions/c-test`: GitHub Composite Action für die vollständige C-Test-Pipeline — bear + lcov Installation, Coverage-Build mit compile_commands.json, Testausführung, lcov-Report via c-coverage und Artefakt-Upload
