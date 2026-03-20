@@ -1,0 +1,93 @@
+name: Rust Coverage (cargo-llvm-cov)
+description: >
+  Measures Rust code coverage with cargo-llvm-cov and produces
+  Cobertura XML and lcov reports for SonarQube / Codecov.
+  Requires actions/checkout to have run in the calling job.
+
+inputs:
+  working-directory:
+    description: Directory containing Cargo.toml, relative to workspace root.
+    required: false
+    default: rust-lib
+
+  rust-toolchain:
+    description: Rust toolchain to use (stable/nightly/version).
+    required: false
+    default: stable
+
+  cobertura-output:
+    description: Path for the Cobertura XML coverage report (empty = skip).
+    required: false
+    default: reports/rust-coverage.xml
+
+  lcov-output:
+    description: Path for the lcov coverage report (empty = skip).
+    required: false
+    default: reports/rust-coverage.lcov
+
+  artifact-name:
+    description: Artifact name for the coverage reports (empty = no upload).
+    required: false
+    default: rust-coverage
+
+  retention-days:
+    description: Artifact retention in days.
+    required: false
+    default: '30'
+
+  codecov-flags:
+    description: Comma-separated flags for Codecov upload (empty = no upload).
+    required: false
+    default: ''
+
+runs:
+  using: composite
+  steps:
+    - name: Install Rust toolchain with llvm-tools
+      uses: dtolnay/rust-toolchain@master
+      with:
+        toolchain: ${{ inputs.rust-toolchain }}
+        components: llvm-tools-preview
+
+    - name: Install cargo-llvm-cov
+      shell: bash
+      run: cargo install cargo-llvm-cov --locked --quiet
+
+    - name: Run Rust Coverage (Cobertura XML)
+      if: inputs.cobertura-output != ''
+      shell: bash
+      run: |
+        mkdir -p "$(dirname "${{ inputs.cobertura-output }}")"
+        cd ${{ inputs.working-directory }}
+        cargo llvm-cov \
+          --cobertura \
+          --output-path "../${{ inputs.cobertura-output }}"
+        echo "Cobertura coverage written to ${{ inputs.cobertura-output }}"
+
+    - name: Run Rust Coverage (lcov)
+      if: inputs.lcov-output != ''
+      shell: bash
+      run: |
+        mkdir -p "$(dirname "${{ inputs.lcov-output }}")"
+        cd ${{ inputs.working-directory }}
+        cargo llvm-cov \
+          --lcov \
+          --output-path "../${{ inputs.lcov-output }}"
+        echo "lcov coverage written to ${{ inputs.lcov-output }}"
+
+    - name: Upload Coverage (Codecov)
+      if: inputs.codecov-flags != '' && inputs.lcov-output != ''
+      uses: codecov/codecov-action@v5
+      with:
+        file: ${{ inputs.lcov-output }}
+        flags: ${{ inputs.codecov-flags }}
+
+    - name: Upload Rust Coverage Artifact
+      if: inputs.artifact-name != ''
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ inputs.artifact-name }}
+        path: |
+          ${{ inputs.cobertura-output }}
+          ${{ inputs.lcov-output }}
+        retention-days: ${{ inputs.retention-days }}
