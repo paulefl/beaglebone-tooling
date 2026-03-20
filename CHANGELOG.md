@@ -8,6 +8,11 @@ Format basiert auf [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
 ## [Unreleased]
 
+### Added (Issue #25)
+
+- `sonarqube_report.py`: Ruft SonarQube Web API ab (paginiert, max. 500 Issues), erstellt strukturierten Markdown-Report mit Severity×Typ-Tabelle, Top-50-Issues und Quality Gate Status
+- `.github/actions/sonarqube-report`: GitHub Composite Action — generiert SonarQube Overview Report als Job Summary und Artefakt; graceful skip wenn Token fehlt
+
 ### Changed (Issue #19)
 
 - Alle `SonarCloud`-Erwähnungen in Texten, Kommentaren und Docstrings → `SonarQube`
