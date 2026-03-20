@@ -1,0 +1,123 @@
+name: Release Bump — beaglebone_black
+
+# Automatically bumps all beaglebone-tooling action references in beaglebone_black
+# after a new release is published here.
+#
+# Required secret in beaglebone-tooling:
+#   BUMP_TOKEN — GitHub PAT with scope: contents:write + pull_requests:write on paulefl/beaglebone_black
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version tag to bump to (e.g. v1.1.14)'
+        required: true
+
+jobs:
+  bump:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Determine version
+        id: version
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "tag=${{ inputs.version }}" >> $GITHUB_OUTPUT
+          else
+            echo "tag=${{ github.event.release.tag_name }}" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Checkout beaglebone_black
+        uses: actions/checkout@v4
+        with:
+          repository: paulefl/beaglebone_black
+          token: ${{ secrets.BUMP_TOKEN }}
+          path: beaglebone_black
+
+      - name: Create bump branch
+        run: |
+          cd beaglebone_black
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git checkout -b bump/tooling-${{ steps.version.outputs.tag }}
+
+      - name: Bump version references in ci.yml
+        run: |
+          TAG="${{ steps.version.outputs.tag }}"
+          sed -i "s|\(paulefl/beaglebone-tooling/[^@]*\)@v[0-9][0-9.]*|\1@${TAG}|g" \
+            beaglebone_black/.github/workflows/ci.yml
+          echo "Resulting beaglebone-tooling references:"
+          grep "beaglebone-tooling" beaglebone_black/.github/workflows/ci.yml
+
+      - name: Commit and push
+        id: commit
+        run: |
+          TAG="${{ steps.version.outputs.tag }}"
+          cd beaglebone_black
+          git add .github/workflows/ci.yml
+          if git diff --cached --quiet; then
+            echo "No changes — ci.yml is already at ${TAG}"
+            echo "changed=false" >> $GITHUB_OUTPUT
+          else
+            git commit -m "chore: bump beaglebone-tooling to ${TAG}"
+            git push origin bump/tooling-${TAG}
+            echo "changed=true" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Create Pull Request
+        id: pr
+        if: steps.commit.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.BUMP_TOKEN }}
+        run: |
+          TAG="${{ steps.version.outputs.tag }}"
+          PR_URL=$(gh pr create \
+            --repo paulefl/beaglebone_black \
+            --title "chore: bump beaglebone-tooling to ${TAG}" \
+            --body "Automated version bump triggered by [release ${TAG}](https://github.com/paulefl/beaglebone-tooling/releases/tag/${TAG}) in beaglebone-tooling." \
+            --base main \
+            --head bump/tooling-${TAG})
+          PR_NUMBER=$(echo "$PR_URL" | grep -oE '[0-9]+$')
+          echo "pr_url=${PR_URL}" >> $GITHUB_OUTPUT
+          echo "pr_number=${PR_NUMBER}" >> $GITHUB_OUTPUT
+          echo "PR created: ${PR_URL}"
+
+      - name: Wait for CI and auto-merge
+        if: steps.commit.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.BUMP_TOKEN }}
+        run: |
+          PR_NUMBER="${{ steps.pr.outputs.pr_number }}"
+          TAG="${{ steps.version.outputs.tag }}"
+          echo "Waiting for CI on PR #${PR_NUMBER} in beaglebone_black..."
+
+          for i in $(seq 1 40); do
+            sleep 30
+            OUTPUT=$(gh pr checks "${PR_NUMBER}" --repo paulefl/beaglebone_black 2>&1)
+            EXITCODE=$?
+            echo "[$i/40] gh pr checks exit=${EXITCODE}"
+
+            if echo "$OUTPUT" | grep -qiE "no checks|not found"; then
+              echo "  No checks yet — waiting..."
+              continue
+            elif echo "$OUTPUT" | grep -qiE "\bfail\b|\berror\b|\bcancelled\b|\btimed_out\b"; then
+              echo "  CI failed — leaving PR open for manual review"
+              echo "$OUTPUT"
+              exit 1
+            elif [ "$EXITCODE" -eq 0 ]; then
+              echo "  All checks passed — merging PR"
+              gh pr merge "${PR_NUMBER}" \
+                --repo paulefl/beaglebone_black \
+                --squash \
+                --delete-branch \
+                --subject "chore: bump beaglebone-tooling to ${TAG}"
+              echo "Merged PR #${PR_NUMBER}"
+              exit 0
+            else
+              echo "  Checks still running..."
+            fi
+          done
+
+          echo "Timeout after 20 minutes — leaving PR open"
+          exit 1
