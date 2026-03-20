@@ -52,6 +52,11 @@ inputs:
     required: false
     default: shell-sarif
 
+  requirements-sarif-artifact:
+    description: Artifact name for Requirements Coverage SARIF (empty = skip). (#4)
+    required: false
+    default: requirements-sarif
+
   # Future SARIF artifacts — add inputs here as issues are implemented:
   # go-sarif-artifact:      feat: SARIF Report für Go — golangci-lint (#8)
   # python-sarif-artifact:  feat: SARIF Report für Python — bandit (#5)
@@ -101,6 +106,14 @@ runs:
       uses: actions/download-artifact@v4
       with:
         name: ${{ inputs.shell-sarif-artifact }}
+        path: reports/
+      continue-on-error: true
+
+    - name: Download Requirements Coverage SARIF
+      if: inputs.requirements-sarif-artifact != ''
+      uses: actions/download-artifact@v4
+      with:
+        name: ${{ inputs.requirements-sarif-artifact }}
         path: reports/
       continue-on-error: true
 
