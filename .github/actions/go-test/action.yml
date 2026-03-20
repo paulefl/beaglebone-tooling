@@ -2,9 +2,11 @@ name: Go Test Pipeline
 description: >
   Full Go test pipeline: setup-go, install report tools, run tests with
   race detector + coverage, enforce quality gate, convert reports
-  (Cobertura, SonarQube Generic), upload Codecov and artifact.
+  (Cobertura, SonarQube Generic), optionally convert JUnit → SARIF and
+  upload to GitHub Code Scanning, upload Codecov and artifact.
   Requires actions/checkout to have run in the calling job.
   Scripts are resolved via GITHUB_ACTION_PATH — no download-tooling needed.
+  Job must declare security-events: write when upload-sarif is true.
 
 inputs:
   go-version:
@@ -44,6 +46,16 @@ inputs:
     description: Name of the uploaded reports artifact.
     required: false
     default: go-reports
+
+  upload-sarif:
+    description: Convert JUnit XML → SARIF and upload to GitHub Code Scanning ('true'/'false'). Requires security-events:write in the calling job.
+    required: false
+    default: 'true'
+
+  sarif-category:
+    description: Category label for the SARIF upload (used to distinguish multiple uploads).
+    required: false
+    default: go-tests
 
 runs:
   using: composite
@@ -104,6 +116,20 @@ runs:
       with:
         file: ${{ inputs.working-directory }}/coverage.out
         flags: ${{ inputs.codecov-flags }}
+
+    - name: Convert Go JUnit → SARIF
+      if: inputs.upload-sarif == 'true'
+      shell: bash
+      run: |
+        pip install junit2sarif --quiet
+        junit2sarif reports/go-tests-junit.xml -o reports/go-tests.sarif
+
+    - name: Upload Go Test SARIF to GitHub Code Scanning
+      if: inputs.upload-sarif == 'true'
+      uses: github/codeql-action/upload-sarif@v3
+      with:
+        sarif_file: reports/go-tests.sarif
+        category: ${{ inputs.sarif-category }}
 
     - name: Upload Go reports
       if: inputs.upload-artifact == 'true'
