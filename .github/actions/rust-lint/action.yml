@@ -1,0 +1,85 @@
+name: Rust Lint (cargo clippy → SARIF)
+description: >
+  Runs cargo clippy with JSON output, converts to SARIF 2.1.0 via clippy-sarif,
+  uploads to GitHub Code Scanning and as artifact for SonarQube.
+  Requires actions/checkout to have run in the calling job.
+  Job must declare security-events: write when upload-sarif is true.
+
+inputs:
+  working-directory:
+    description: Directory containing Cargo.toml, relative to workspace root.
+    required: false
+    default: rust-lib
+
+  rust-toolchain:
+    description: Rust toolchain to use (stable/nightly/version).
+    required: false
+    default: stable
+
+  clippy-args:
+    description: Additional arguments passed after '--' to clippy (e.g. '-D warnings').
+    required: false
+    default: ''
+
+  sarif-output:
+    description: Path for the SARIF output file.
+    required: false
+    default: reports/rust-lint.sarif
+
+  artifact-name:
+    description: Artifact name for the SARIF report (empty = no upload).
+    required: false
+    default: rust-sarif
+
+  retention-days:
+    description: Artifact retention in days.
+    required: false
+    default: '30'
+
+  upload-sarif:
+    description: Upload SARIF to GitHub Code Scanning ('true'/'false'). Requires security-events:write.
+    required: false
+    default: 'true'
+
+runs:
+  using: composite
+  steps:
+    - name: Install Rust toolchain
+      uses: dtolnay/rust-toolchain@master
+      with:
+        toolchain: ${{ inputs.rust-toolchain }}
+        components: clippy
+
+    - name: Install clippy-sarif and sarif-fmt
+      shell: bash
+      run: cargo install clippy-sarif sarif-fmt --locked --quiet
+
+    - name: Run cargo clippy → SARIF
+      shell: bash
+      run: |
+        mkdir -p "$(dirname "${{ inputs.sarif-output }}")"
+        cd ${{ inputs.working-directory }}
+        cargo clippy \
+          --message-format=json \
+          ${{ inputs.clippy-args }} \
+          2>/dev/null \
+          | clippy-sarif \
+          | tee "../${{ inputs.sarif-output }}" \
+          | sarif-fmt || true
+        echo "Findings: $(python3 -c "import json; d=json.load(open('../${{ inputs.sarif-output }}')); print(len(d['runs'][0]['results']))" 2>/dev/null || echo '?')"
+
+    - name: Upload Rust Lint SARIF to GitHub Code Scanning
+      if: inputs.upload-sarif == 'true'
+      continue-on-error: true
+      uses: github/codeql-action/upload-sarif@v3
+      with:
+        sarif_file: ${{ inputs.sarif-output }}
+        category: rust-lint
+
+    - name: Upload Rust Lint SARIF Artifact
+      if: inputs.artifact-name != ''
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ inputs.artifact-name }}
+        path: ${{ inputs.sarif-output }}
+        retention-days: ${{ inputs.retention-days }}
