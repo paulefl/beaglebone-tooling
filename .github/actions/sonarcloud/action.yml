@@ -78,7 +78,10 @@ inputs:
     required: false
     default: c-sarif
 
-  # rust-coverage-artifact: feat: Rust Coverage — cargo-llvm-cov (#9)
+  rust-coverage-artifact:
+    description: Artifact name for Rust Coverage reports / cargo-llvm-cov (empty = skip). (#9)
+    required: false
+    default: rust-coverage
 
 runs:
   using: composite
@@ -165,7 +168,15 @@ runs:
         path: reports/
       continue-on-error: true
 
-    # Future downloads go here as issues #8, #9 are implemented.
+    - name: Download Rust Coverage
+      if: inputs.rust-coverage-artifact != ''
+      uses: actions/download-artifact@v4
+      with:
+        name: ${{ inputs.rust-coverage-artifact }}
+        path: reports/
+      continue-on-error: true
+
+    # All SARIF and coverage artifacts are now wired up (#3–#9 complete).
 
     # ── SonarCloud Scan ─────────────────────────────────────────────────────
     - name: SonarCloud Scan
