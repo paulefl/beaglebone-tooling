@@ -3,9 +3,11 @@ description: >
   Full StrictDoc pipeline: setup Python, install StrictDoc + test deps,
   run pytest for test-traceability, install Chromium if needed,
   run make req-tracing, write traceability summary via req_tracing_summary.py,
-  and upload HTML/PDF/Excel/ReqIF artifacts.
+  convert requirements coverage gaps to SARIF via strictdoc_to_sarif.py,
+  upload SARIF to GitHub Code Scanning, and upload HTML/PDF/Excel/ReqIF artifacts.
   Requires actions/checkout to have run in the calling job.
   Scripts are resolved via GITHUB_ACTION_PATH — no download-tooling needed.
+  Job must declare security-events: write when upload-sarif is true.
 
 inputs:
   python-version:
@@ -42,6 +44,21 @@ inputs:
     description: Whether to upload HTML/PDF/Excel/ReqIF artifacts ('true'/'false').
     required: false
     default: 'true'
+
+  sdoc-glob:
+    description: Glob pattern to find .sdoc requirement files.
+    required: false
+    default: docs/requirements/**/*.sdoc
+
+  upload-sarif:
+    description: Convert requirements gaps to SARIF and upload to GitHub Code Scanning ('true'/'false'). Requires security-events:write in the calling job.
+    required: false
+    default: 'true'
+
+  sarif-artifact:
+    description: Artifact name for the requirements SARIF (empty = no upload).
+    required: false
+    default: requirements-sarif
 
 runs:
   using: composite
@@ -87,6 +104,30 @@ runs:
       if: always()
       shell: bash
       run: python3 "$GITHUB_ACTION_PATH/../../../req_tracing_summary.py"
+
+    - name: Requirements Coverage → SARIF
+      if: always()
+      shell: bash
+      run: |
+        python3 "$GITHUB_ACTION_PATH/../../../strictdoc_to_sarif.py" \
+          --sdoc-glob "${{ inputs.sdoc-glob }}" \
+          --output reports/requirements-coverage.sarif
+
+    - name: Upload Requirements SARIF to GitHub Code Scanning
+      if: inputs.upload-sarif == 'true'
+      continue-on-error: true
+      uses: github/codeql-action/upload-sarif@v3
+      with:
+        sarif_file: reports/requirements-coverage.sarif
+        category: requirements-coverage
+
+    - name: Upload Requirements SARIF Artifact
+      if: inputs.sarif-artifact != ''
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ inputs.sarif-artifact }}
+        path: reports/requirements-coverage.sarif
+        retention-days: ${{ inputs.retention-days }}
 
     - name: Upload StrictDoc HTML
       if: inputs.upload-artifacts == 'true'
