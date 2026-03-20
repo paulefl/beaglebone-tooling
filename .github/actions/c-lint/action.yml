@@ -1,0 +1,105 @@
+name: C Lint (clang-tidy → SARIF)
+description: >
+  Runs clang-tidy on C sources, converts findings to SARIF 2.1.0 via
+  clang-tidy-sarif, uploads to GitHub Code Scanning and as artifact for SonarQube.
+  Generates compile_commands.json via bear if not provided.
+  Requires actions/checkout to have run in the calling job.
+  Job must declare security-events: write when upload-sarif is true.
+
+inputs:
+  makefile-dir:
+    description: Directory containing the Makefile (used to generate compile_commands.json via bear).
+    required: false
+    default: c-lib
+
+  compile-commands:
+    description: >
+      Path to an existing compile_commands.json (relative to workspace root).
+      If empty, compile_commands.json is generated via bear + make.
+    required: false
+    default: ''
+
+  src-glob:
+    description: Shell glob pattern for C source files to analyse.
+    required: false
+    default: c-lib/src/*.c
+
+  clang-tidy-checks:
+    description: Clang-tidy checks to enable (passed to --checks). Empty = use .clang-tidy if present.
+    required: false
+    default: ''
+
+  sarif-output:
+    description: Path for the SARIF output file.
+    required: false
+    default: reports/c-lint.sarif
+
+  artifact-name:
+    description: Artifact name for the SARIF report (empty = no upload).
+    required: false
+    default: c-sarif
+
+  retention-days:
+    description: Artifact retention in days.
+    required: false
+    default: '30'
+
+  upload-sarif:
+    description: Upload SARIF to GitHub Code Scanning ('true'/'false'). Requires security-events:write.
+    required: false
+    default: 'true'
+
+runs:
+  using: composite
+  steps:
+    - name: Install clang-tidy, bear and clang-tidy-sarif
+      shell: bash
+      run: |
+        sudo apt-get install -y --no-install-recommends clang-tidy bear
+        pip install clang-tidy-sarif --quiet
+
+    - name: Generate compile_commands.json
+      if: inputs.compile-commands == ''
+      shell: bash
+      run: |
+        bear --output "${{ inputs.makefile-dir }}/compile_commands.json" -- \
+          make -C "${{ inputs.makefile-dir }}" CC=gcc 2>/dev/null || \
+        bear --output "${{ inputs.makefile-dir }}/compile_commands.json" -- \
+          make -C "${{ inputs.makefile-dir }}" CC=gcc all 2>/dev/null || true
+
+    - name: Run clang-tidy → SARIF
+      shell: bash
+      run: |
+        mkdir -p "$(dirname "${{ inputs.sarif-output }}")"
+        COMPILE_COMMANDS="${{ inputs.compile-commands }}"
+        if [ -z "$COMPILE_COMMANDS" ]; then
+          COMPILE_COMMANDS="${{ inputs.makefile-dir }}/compile_commands.json"
+        fi
+        CHECKS_ARG=""
+        if [ -n "${{ inputs.clang-tidy-checks }}" ]; then
+          CHECKS_ARG="--checks=${{ inputs.clang-tidy-checks }}"
+        fi
+        # Run clang-tidy; exit code ignored — findings are captured in SARIF
+        clang-tidy \
+          -p "$COMPILE_COMMANDS" \
+          $CHECKS_ARG \
+          ${{ inputs.src-glob }} \
+          2>&1 \
+          | clang-tidy-sarif > "${{ inputs.sarif-output }}" || true
+        echo "Findings: $(python3 -c "import json; d=json.load(open('${{ inputs.sarif-output }}')); print(len(d['runs'][0]['results']))" 2>/dev/null || echo '?')"
+
+    - name: Upload C Lint SARIF to GitHub Code Scanning
+      if: inputs.upload-sarif == 'true'
+      continue-on-error: true
+      uses: github/codeql-action/upload-sarif@v3
+      with:
+        sarif_file: ${{ inputs.sarif-output }}
+        category: c-lint
+
+    - name: Upload C Lint SARIF Artifact
+      if: inputs.artifact-name != ''
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ inputs.artifact-name }}
+        path: ${{ inputs.sarif-output }}
+        retention-days: ${{ inputs.retention-days }}
