@@ -4,7 +4,8 @@ description: >
   run pytest for test-traceability, install Chromium if needed,
   run make req-tracing, write traceability summary via req_tracing_summary.py,
   and upload HTML/PDF/Excel/ReqIF artifacts.
-  Requires actions/checkout and download-tooling to have run beforehand.
+  Requires actions/checkout to have run in the calling job.
+  Scripts are resolved via GITHUB_ACTION_PATH — no download-tooling needed.
 
 inputs:
   python-version:
@@ -85,7 +86,7 @@ runs:
     - name: Traceability Report in Workflow Summary schreiben
       if: always()
       shell: bash
-      run: python3 tooling/req_tracing_summary.py
+      run: python3 "$GITHUB_ACTION_PATH/../../../req_tracing_summary.py"
 
     - name: Upload StrictDoc HTML
       if: inputs.upload-artifacts == 'true'

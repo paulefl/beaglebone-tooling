@@ -3,8 +3,8 @@ description: >
   Shell script quality pipeline: bash -n syntax check on all .sh files,
   ShellCheck analysis with JSON→SARIF conversion via shellcheck_to_sarif.py,
   and optional artifact upload.
-  Requires actions/checkout and the tooling/ directory to be present
-  (use download-tooling action beforehand).
+  Requires actions/checkout to have run in the calling job.
+  Scripts are resolved via GITHUB_ACTION_PATH — no download-tooling needed.
 
 inputs:
   scan-path:
@@ -45,9 +45,9 @@ runs:
         FINDINGS=$(find "${{ inputs.scan-path }}" -name "*.sh" -not -path "*/.git/*" \
           | xargs shellcheck --format=json 2>/dev/null || true)
         if [ -z "$FINDINGS" ] || [ "$FINDINGS" = "[]" ]; then
-          echo "[]" | python3 tooling/shellcheck_to_sarif.py > "${{ inputs.output-file }}"
+          echo "[]" | python3 "$GITHUB_ACTION_PATH/../../../shellcheck_to_sarif.py" > "${{ inputs.output-file }}"
         else
-          echo "$FINDINGS" | python3 tooling/shellcheck_to_sarif.py > "${{ inputs.output-file }}"
+          echo "$FINDINGS" | python3 "$GITHUB_ACTION_PATH/../../../shellcheck_to_sarif.py" > "${{ inputs.output-file }}"
         fi
         echo "✅ ShellCheck SARIF: ${{ inputs.output-file }}"
 

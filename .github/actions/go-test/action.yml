@@ -3,8 +3,8 @@ description: >
   Full Go test pipeline: setup-go, install report tools, run tests with
   race detector + coverage, enforce quality gate, convert reports
   (Cobertura, SonarQube Generic), upload Codecov and artifact.
-  Requires actions/checkout and download-tooling to have run beforehand
-  (tooling/junit_to_sonar_generic.py must be present).
+  Requires actions/checkout to have run in the calling job.
+  Scripts are resolved via GITHUB_ACTION_PATH — no download-tooling needed.
 
 inputs:
   go-version:
@@ -94,7 +94,7 @@ runs:
     - name: Convert JUnit XML to SonarQube Generic format
       shell: bash
       run: |
-        python3 tooling/junit_to_sonar_generic.py \
+        python3 "$GITHUB_ACTION_PATH/../../../junit_to_sonar_generic.py" \
           reports/go-tests-junit.xml \
           reports/go-tests-sonar.xml
 
