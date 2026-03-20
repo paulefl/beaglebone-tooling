@@ -51,7 +51,7 @@ runs:
 
     - name: Install bandit
       shell: bash
-      run: pip install bandit --quiet
+      run: pip install bandit bandit-sarif-formatter --quiet
 
     - name: Python Security Scan (bandit → SARIF)
       shell: bash
