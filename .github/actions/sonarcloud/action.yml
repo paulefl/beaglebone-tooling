@@ -69,7 +69,11 @@ inputs:
     required: false
     default: rust-sarif
 
-  # c-sarif-artifact:       feat: SARIF Report für C — clang-tidy (#7)
+  c-sarif-artifact:
+    description: Artifact name for C Lint SARIF / clang-tidy (empty = skip). (#7)
+    required: false
+    default: c-sarif
+
   # rust-coverage-artifact: feat: Rust Coverage — cargo-llvm-cov (#9)
 
 runs:
@@ -141,7 +145,15 @@ runs:
         path: reports/
       continue-on-error: true
 
-    # Future downloads go here as issues #7–#8, #9 are implemented.
+    - name: Download C Lint SARIF
+      if: inputs.c-sarif-artifact != ''
+      uses: actions/download-artifact@v4
+      with:
+        name: ${{ inputs.c-sarif-artifact }}
+        path: reports/
+      continue-on-error: true
+
+    # Future downloads go here as issues #8, #9 are implemented.
 
     # ── SonarCloud Scan ─────────────────────────────────────────────────────
     - name: SonarCloud Scan
