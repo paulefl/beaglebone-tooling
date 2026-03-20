@@ -8,6 +8,14 @@ Format basiert auf [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
 ## [Unreleased]
 
+### Fixed
+
+- `sonarqube-report`: `sonarqube_report.py` ins Action-Verzeichnis verschoben — externe Actions laden nur ihr Unterverzeichnis, nicht das gesamte Repo
+
+---
+
+## [v1.1.15] — 2026-03-20
+
 ### Added (Issue #25)
 
 - `sonarqube_report.py`: Ruft SonarQube Web API ab (paginiert, max. 500 Issues), erstellt strukturierten Markdown-Report mit Severity×Typ-Tabelle, Top-50-Issues und Quality Gate Status
