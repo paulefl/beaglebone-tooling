@@ -94,8 +94,7 @@ jobs:
 
           for i in $(seq 1 40); do
             sleep 30
-            OUTPUT=$(gh pr checks "${PR_NUMBER}" --repo paulefl/beaglebone_black 2>&1)
-            EXITCODE=$?
+            OUTPUT=$(gh pr checks "${PR_NUMBER}" --repo paulefl/beaglebone_black 2>&1) && EXITCODE=$? || EXITCODE=$?
             echo "[$i/40] gh pr checks exit=${EXITCODE}"
 
             if echo "$OUTPUT" | grep -qiE "no checks|not found"; then
