@@ -17,7 +17,7 @@
 set -euo pipefail
 
 GREEN='\033[0;32m'; BLUE='\033[0;34m'; YELLOW='\033[1;33m'
-RED='\033[0;31m'; BOLD='\033[1m'; CYAN='\033[0;36m'; GRAY='\033[0;37m'; NC='\033[0m'
+RED='\033[0;31m'; BOLD='\033[1m'; GRAY='\033[0;37m'; NC='\033[0m'
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
@@ -32,7 +32,6 @@ mkdir -p "$REPORT_DIR"
 TOTAL_PASSED=0
 TOTAL_FAILED=0
 TOTAL_SKIPPED=0
-TOTAL_ERRORS=0
 declare -a SECTION_SUMMARY=()
 
 # ── Hilfsfunktionen ───────────────────────────────────────────────────────────
@@ -48,10 +47,10 @@ record_section() {
     TOTAL_FAILED=$((TOTAL_FAILED + failed))
     TOTAL_SKIPPED=$((TOTAL_SKIPPED + skipped))
 
-    local status icon
-    if   [[ $failed -gt 0 ]]; then icon="${RED}❌${NC}"; status="FAIL"
-    elif [[ $passed -eq 0 && $skipped -gt 0 ]]; then icon="${YELLOW}⏭ ${NC}"; status="SKIP"
-    else icon="${GREEN}✅${NC}"; status="PASS"
+    local icon
+    if   [[ $failed -gt 0 ]]; then icon="${RED}❌${NC}"
+    elif [[ $passed -eq 0 && $skipped -gt 0 ]]; then icon="${YELLOW}⏭ ${NC}"
+    else icon="${GREEN}✅${NC}"
     fi
 
     local line="  ${icon} ${BOLD}${name}${NC}"
@@ -158,7 +157,7 @@ run_shell_syntax() {
     section_header "5. Shell Script Syntax"
     local passed=0 failed=0
     local log_file="$REPORT_DIR/shell-syntax.txt"
-    > "$log_file"
+    : > "$log_file"
 
     while IFS= read -r f; do
         local rel="${f#$REPO_ROOT/}"
@@ -170,7 +169,7 @@ run_shell_syntax() {
             echo -e "  ${RED}❌${NC} $rel"
             bash -n "$f" 2>&1 | sed 's/^/     /'
             echo "❌ $rel" >> "$log_file"
-            bash -n "$f" 2>&1 >> "$log_file" || true
+            bash -n "$f" >> "$log_file" 2>&1 || true
             failed=$((failed + 1))
         fi
     done < <(find "$REPO_ROOT" -name "*.sh" -not -path "*/.git/*" | sort)
