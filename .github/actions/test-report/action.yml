@@ -188,6 +188,7 @@ runs:
         git config user.email "github-actions[bot]@users.noreply.github.com"
         TMPDIR=$(mktemp -d)
         if git ls-remote --exit-code origin refs/heads/reports 2>/dev/null; then
+          git fetch origin reports
           git worktree add "$TMPDIR" origin/reports
         else
           git worktree add --orphan -b reports "$TMPDIR"
