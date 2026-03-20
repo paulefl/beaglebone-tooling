@@ -82,6 +82,7 @@ run_go_tests() {
             pass)   echo -e "  ${GREEN}✅${NC} $test  ${GRAY}${elapsed}s${NC}"; passed=$((passed + 1)) ;;
             fail)   echo -e "  ${RED}❌${NC} $test  ${GRAY}${elapsed}s${NC}";  failed=$((failed + 1)) ;;
             skip)   echo -e "  ${YELLOW}⏭ ${NC} $test";                        skipped=$((skipped + 1)) ;;
+            *)      ;;
         esac
     done < "$go_json"
 
