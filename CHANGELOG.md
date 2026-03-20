@@ -8,6 +8,13 @@ Format basiert auf [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
 ## [Unreleased]
 
+### Changed (Issue #19)
+
+- Alle `SonarCloud`-Erwähnungen in Texten, Kommentaren und Docstrings → `SonarQube`
+- `docs/sonarcloud-trend.md` umbenannt in `docs/sonarqube-trend.md`
+- README-Link und -Abschnittstitel aktualisiert
+- Action-Name `.github/actions/sonarcloud/` bleibt unverändert (interner Bezeichner)
+
 ---
 
 ## [v1.1.14] — 2026-03-20
