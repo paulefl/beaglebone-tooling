@@ -59,7 +59,11 @@ inputs:
 
   # Future SARIF artifacts — add inputs here as issues are implemented:
   # go-sarif-artifact:      feat: SARIF Report für Go — golangci-lint (#8)
-  # python-sarif-artifact:  feat: SARIF Report für Python — bandit (#5)
+  python-sarif-artifact:
+    description: Artifact name for Python Security SARIF / bandit (empty = skip). (#5)
+    required: false
+    default: python-sarif
+
   # c-sarif-artifact:       feat: SARIF Report für C — clang-tidy (#7)
   # rust-sarif-artifact:    feat: SARIF Report für Rust — clippy (#6)
   # rust-coverage-artifact: feat: Rust Coverage — cargo-llvm-cov (#9)
@@ -117,7 +121,15 @@ runs:
         path: reports/
       continue-on-error: true
 
-    # Future downloads go here as issues #5–#8, #9 are implemented.
+    - name: Download Python Security SARIF
+      if: inputs.python-sarif-artifact != ''
+      uses: actions/download-artifact@v4
+      with:
+        name: ${{ inputs.python-sarif-artifact }}
+        path: reports/
+      continue-on-error: true
+
+    # Future downloads go here as issues #6–#8, #9 are implemented.
 
     # ── SonarCloud Scan ─────────────────────────────────────────────────────
     - name: SonarCloud Scan

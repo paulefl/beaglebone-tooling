@@ -35,3 +35,8 @@ Format basiert auf [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 - `strictdoc_to_sarif.py`: Konvertiert StrictDoc-Anforderungen ohne `TYPE: File` Relations in SARIF 2.1.0 — erscheinen als Code Smells in SonarCloud und GitHub Code Scanning
 - `strictdoc`: SARIF-Generierung via `strictdoc_to_sarif.py` + Upload zu GitHub Code Scanning + Artifact `requirements-sarif`; neue Inputs: `sdoc-glob`, `upload-sarif`, `sarif-artifact`; erfordert `security-events: write`
 - `sonarcloud`: lädt `requirements-sarif` Artifact herunter (Issue #4); Placeholder für künftige SARIF-Issues (#5–#8, #9) bleibt erhalten
+
+### Added (Issue #5)
+
+- `.github/actions/python-security`: GitHub Composite Action für Python Security Scanning — bandit OWASP Scanner mit nativem SARIF-Output, Upload zu GitHub Code Scanning + SonarCloud via `python-sarif` Artifact; Inputs: `scan-targets`, `bandit-args`, `upload-sarif`, `artifact-name`
+- `sonarcloud`: lädt `python-sarif` Artifact herunter (Issue #5)
