@@ -1,6 +1,6 @@
 name: 'C Code Coverage'
 description: >
-  Erzeugt eine lcov .info-Datei aus gcov-Daten für SonarCloud
+  Erzeugt eine lcov .info-Datei aus gcov-Daten für SonarQube
   (sonar.c.lcov.reportPaths). Setzt voraus, dass der C-Code mit
   -fprofile-arcs -ftest-coverage gebaut und die Tests ausgeführt wurden.
 

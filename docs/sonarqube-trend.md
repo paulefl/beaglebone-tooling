@@ -1,8 +1,8 @@
-# SonarCloud Quality Metrics Trend — Einrichtung und Nutzung
+# SonarQube Quality Metrics Trend — Einrichtung und Nutzung
 
-SonarCloud bietet eingebautes Trend-Tracking für Quality Metrics — jeder CI-Lauf erzeugt automatisch einen Snapshot, der in der SonarCloud-Oberfläche als Zeitreihe sichtbar ist.
+SonarQube bietet eingebautes Trend-Tracking für Quality Metrics — jeder CI-Lauf erzeugt automatisch einen Snapshot, der in der SonarQube-Oberfläche als Zeitreihe sichtbar ist.
 
-## Was SonarCloud automatisch trackt (pro CI-Run)
+## Was SonarQube automatisch trackt (pro CI-Run)
 
 | Metrik | Wo sichtbar |
 |--------|-------------|
@@ -16,11 +16,11 @@ SonarCloud bietet eingebautes Trend-Tracking für Quality Metrics — jeder CI-L
 
 ## Voraussetzung: Automatic Analysis deaktivieren
 
-**Wichtig:** SonarCloud muss auf CI-basierte Analyse umgestellt werden, sonst schlägt der CI-Scanner mit Exit Code 3 fehl.
+**Wichtig:** SonarQube muss auf CI-basierte Analyse umgestellt werden, sonst schlägt der CI-Scanner mit Exit Code 3 fehl.
 
 **Einmalige Einrichtung:**
 
-1. SonarCloud UI öffnen → Projekt auswählen
+1. SonarQube UI öffnen → Projekt auswählen
 2. **Administration → Analysis Method**
 3. **Automatic Analysis: Off** stellen
 
@@ -33,11 +33,11 @@ Solange Automatic Analysis aktiv ist, wird jede CI-Analyse abgewiesen.
 | Go Coverage (Cobertura XML) | `sonar.go.coverage.reportPaths` |
 | Python Coverage (coverage.xml) | `sonar.python.coverage.reportPaths` |
 | Go + Python Test Results (JUnit XML) | `sonar.testExecutionReportPaths` |
-| SonarCloud CI Job | `.github/workflows/ci.yml` → `sonarcloud` Job |
+| SonarQube CI Job | `.github/workflows/ci.yml` → `sonarcloud` Job |
 
 ## Branch-Vergleich bei Pull Requests (kostenlos, automatisch)
 
-SonarCloud zeigt bei jedem PR automatisch:
+SonarQube zeigt bei jedem PR automatisch:
 
 - Anzahl **neuer Issues** des Branches (vs. main)
 - Ob der **Quality Gate** für den PR besteht
@@ -60,5 +60,5 @@ Sobald folgende Issues implementiert sind, zeigt der Trend auch statische Analys
 
 ## Weiterführende Links
 
-- [SonarCloud Dokumentation — CI-basierte Analyse](https://docs.sonarsource.com/sonarcloud/advanced-setup/ci-based-analysis/)
-- [SonarCloud GitHub Action](https://github.com/SonarSource/sonarcloud-github-action)
+- [SonarQube Dokumentation — CI-basierte Analyse](https://docs.sonarsource.com/sonarcloud/advanced-setup/ci-based-analysis/)
+- [SonarQube GitHub Action](https://github.com/SonarSource/sonarcloud-github-action)

@@ -15,7 +15,7 @@ CI/CD Tooling für das [BeagleBone Black](https://github.com/paulefl/beaglebone_
 | `req_tracing_summary.py` | Erzeugt Requirements-Traceability-Zusammenfassung |
 | `junit_to_sonar_generic.py` | Konvertiert JUnit XML → Sonar Generic Test Format |
 | `shellcheck_to_sarif.py` | Konvertiert shellcheck JSON → SARIF |
-| `c_coverage.sh` | C Code Coverage mit gcov/lcov → `.info`-Datei für SonarCloud |
+| `c_coverage.sh` | C Code Coverage mit gcov/lcov → `.info`-Datei für SonarQube |
 | `bausteinsicht` | Bausteinsicht-Diagramm-Generator (Binary) |
 
 ## Tests ausführen
@@ -57,11 +57,11 @@ Das Tooling wird via GitHub Releases eingebunden:
 - tar xf tooling-v*.tar.gz
 ```
 
-## SonarCloud Quality Metrics
+## SonarQube Quality Metrics
 
-Das Projekt nutzt SonarCloud für kontinuierliches Quality-Tracking. Jeder CI-Lauf erzeugt automatisch einen Snapshot (Coverage, Bugs, Technical Debt, Quality Gate).
+Das Projekt nutzt SonarQube für kontinuierliches Quality-Tracking. Jeder CI-Lauf erzeugt automatisch einen Snapshot (Coverage, Bugs, Technical Debt, Quality Gate).
 
-→ Vollständige Dokumentation: [docs/sonarcloud-trend.md](docs/sonarcloud-trend.md)
+→ Vollständige Dokumentation: [docs/sonarqube-trend.md](docs/sonarqube-trend.md)
 
 ## Release erstellen
 

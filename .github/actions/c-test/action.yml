@@ -3,7 +3,7 @@ description: >
   Full C test pipeline: installs bear + lcov, builds the C library with
   coverage instrumentation and generates compile_commands.json, runs the
   test binary, generates an lcov .info report, and uploads both the coverage
-  report and the compilation database as an artifact for SonarCloud.
+  report and the compilation database as an artifact for SonarQube.
   Requires actions/checkout to have run in the calling job.
 
 inputs:
