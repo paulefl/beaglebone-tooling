@@ -58,7 +58,11 @@ inputs:
     default: requirements-sarif
 
   # Future SARIF artifacts — add inputs here as issues are implemented:
-  # go-sarif-artifact:      feat: SARIF Report für Go — golangci-lint (#8)
+  go-sarif-artifact:
+    description: Artifact name for Go Lint SARIF / golangci-lint (empty = skip). (#8)
+    required: false
+    default: go-sarif
+
   python-sarif-artifact:
     description: Artifact name for Python Security SARIF / bandit (empty = skip). (#5)
     required: false
@@ -113,6 +117,14 @@ runs:
         cp "${{ inputs.compile-commands-source }}" "${{ inputs.compile-commands-dest }}" 2>/dev/null || true
 
     # ── SARIF Reports herunterladen ─────────────────────────────────────────
+    - name: Download Go Lint SARIF
+      if: inputs.go-sarif-artifact != ''
+      uses: actions/download-artifact@v4
+      with:
+        name: ${{ inputs.go-sarif-artifact }}
+        path: reports/
+      continue-on-error: true
+
     - name: Download ShellCheck SARIF
       if: inputs.shell-sarif-artifact != ''
       uses: actions/download-artifact@v4
