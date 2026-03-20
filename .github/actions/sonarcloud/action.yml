@@ -1,0 +1,136 @@
+name: SonarCloud Analysis
+description: >
+  Downloads all coverage and SARIF report artifacts, arranges them for
+  SonarCloud, runs the scan and checks the result.
+  Requires actions/checkout with fetch-depth: 0 in the calling job.
+  Designed to grow as new SARIF report types are added (issues #5–#8, #9).
+
+inputs:
+  sonar-token:
+    description: SonarCloud token (SONAR_TOKEN secret).
+    required: true
+
+  # ── Coverage Artifacts ──────────────────────────────────────────────────
+  go-reports-artifact:
+    description: Artifact name for Go reports (empty = skip).
+    required: false
+    default: go-reports
+
+  python-reports-artifact:
+    description: Artifact name for Python reports (empty = skip).
+    required: false
+    default: python-reports
+
+  c-reports-artifact:
+    description: Artifact name for C reports (empty = skip).
+    required: false
+    default: c-reports
+
+  c-coverage-source:
+    description: Path inside the c-reports artifact for the lcov .info file.
+    required: false
+    default: c-reports/reports/c-coverage.info
+
+  c-coverage-dest:
+    description: Destination path for the lcov .info file (matches sonar-project.properties).
+    required: false
+    default: reports/c-coverage.info
+
+  compile-commands-source:
+    description: Path inside the c-reports artifact for compile_commands.json.
+    required: false
+    default: c-reports/c-lib/compile_commands.json
+
+  compile-commands-dest:
+    description: Destination path for compile_commands.json (matches sonar-project.properties).
+    required: false
+    default: c-lib/compile_commands.json
+
+  # ── SARIF Artifacts ─────────────────────────────────────────────────────
+  shell-sarif-artifact:
+    description: Artifact name for ShellCheck SARIF (empty = skip). (#shellcheck-sarif action)
+    required: false
+    default: shell-sarif
+
+  # Future SARIF artifacts — add inputs here as issues are implemented:
+  # go-sarif-artifact:      feat: SARIF Report für Go — golangci-lint (#8)
+  # python-sarif-artifact:  feat: SARIF Report für Python — bandit (#5)
+  # c-sarif-artifact:       feat: SARIF Report für C — clang-tidy (#7)
+  # rust-sarif-artifact:    feat: SARIF Report für Rust — clippy (#6)
+  # rust-coverage-artifact: feat: Rust Coverage — cargo-llvm-cov (#9)
+
+runs:
+  using: composite
+  steps:
+    # ── Coverage Reports herunterladen ──────────────────────────────────────
+    - name: Download Go reports
+      if: inputs.go-reports-artifact != ''
+      uses: actions/download-artifact@v4
+      with:
+        name: ${{ inputs.go-reports-artifact }}
+        path: reports/
+      continue-on-error: true
+
+    - name: Download Python reports
+      if: inputs.python-reports-artifact != ''
+      uses: actions/download-artifact@v4
+      with:
+        name: ${{ inputs.python-reports-artifact }}
+        path: reports/
+      continue-on-error: true
+
+    - name: Download C reports
+      if: inputs.c-reports-artifact != ''
+      uses: actions/download-artifact@v4
+      with:
+        name: ${{ inputs.c-reports-artifact }}
+        path: c-reports/
+      continue-on-error: true
+
+    - name: Arrange C reports
+      if: inputs.c-reports-artifact != ''
+      shell: bash
+      run: |
+        mkdir -p reports c-lib
+        cp "${{ inputs.c-coverage-source }}" "${{ inputs.c-coverage-dest }}" 2>/dev/null || true
+        cp "${{ inputs.compile-commands-source }}" "${{ inputs.compile-commands-dest }}" 2>/dev/null || true
+
+    # ── SARIF Reports herunterladen ─────────────────────────────────────────
+    - name: Download ShellCheck SARIF
+      if: inputs.shell-sarif-artifact != ''
+      uses: actions/download-artifact@v4
+      with:
+        name: ${{ inputs.shell-sarif-artifact }}
+        path: reports/
+      continue-on-error: true
+
+    # Future downloads go here as issues #5–#8, #9 are implemented.
+
+    # ── SonarCloud Scan ─────────────────────────────────────────────────────
+    - name: SonarCloud Scan
+      id: sonar
+      uses: SonarSource/sonarqube-scan-action@v6
+      continue-on-error: true
+      env:
+        GITHUB_TOKEN: ${{ env.GITHUB_TOKEN }}
+        SONAR_TOKEN:  ${{ inputs.sonar-token }}
+        SONAR_HOST_URL: https://sonarcloud.io
+
+    - name: SonarCloud Ergebnis prüfen
+      if: always()
+      shell: bash
+      run: |
+        if [ "${{ steps.sonar.outcome }}" = "failure" ]; then
+          if [ -z "${{ inputs.sonar-token }}" ]; then
+            echo "⚠️  SonarCloud übersprungen: SONAR_TOKEN nicht gesetzt"
+          else
+            echo "❌ SonarCloud Scan fehlgeschlagen"
+            echo "   Mögliche Ursachen:"
+            echo "   - Compilation Database fehlt für C/C++ (sonar.cfamily.compile-commands)"
+            echo "   - Ungültiger SONAR_TOKEN"
+            echo "   - Falsches sonar.projectKey / sonar.organization"
+            exit 1
+          fi
+        else
+          echo "✅ SonarCloud Scan erfolgreich"
+        fi

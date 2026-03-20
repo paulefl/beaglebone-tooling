@@ -19,3 +19,4 @@ Format basiert auf [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 - `.github/actions/c-test`: GitHub Composite Action für die vollständige C-Test-Pipeline — bear + lcov Installation, Coverage-Build mit compile_commands.json, Testausführung, lcov-Report via c-coverage und Artefakt-Upload
 - `.github/actions/strictdoc`: GitHub Composite Action für den vollständigen StrictDoc-Export — Python-Setup, StrictDoc + Test-Deps, Pytest JUnit-XML, Chrome-Check, make req-tracing, req_tracing_summary.py, HTML/PDF/Excel/ReqIF Artefakt-Upload
 - `.github/actions/test-report`: GitHub Composite Action für den vollständigen Test-Report + GitHub Pages Deploy — Trend-Cache, trend_summary.py, generate_reports.py, reports-Branch-Persistenz und Pages-Deployment
+- `.github/actions/sonarcloud`: GitHub Composite Action für SonarCloud Analysis — lädt alle Coverage- und SARIF-Artefakte, arrangiert C-Reports, führt Scan durch; erweiterbar für künftige SARIF-Reports (#5–#8, #9)
