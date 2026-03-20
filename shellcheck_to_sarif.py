@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Convert shellcheck JSON output to SARIF 2.1.0 format for SonarCloud."""
+"""Convert shellcheck JSON output to SARIF 2.1.0 format for SonarQube."""
 import json
 import sys
 

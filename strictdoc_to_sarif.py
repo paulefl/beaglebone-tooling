@@ -2,7 +2,7 @@
 """Convert StrictDoc requirements coverage gaps to SARIF 2.1.0.
 
 Requirements without any TYPE: File relations are reported as SARIF findings
-so they appear as Code Smells in SonarCloud / GitHub Code Scanning.
+so they appear as Code Smells in SonarQube / GitHub Code Scanning.
 
 Usage:
     python3 strictdoc_to_sarif.py [--sdoc-glob GLOB] [--output FILE]

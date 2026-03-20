@@ -1,7 +1,7 @@
 name: Python Security Scan
 description: >
   Runs bandit (OWASP Python Security Scanner) and produces a SARIF report
-  for GitHub Code Scanning and SonarCloud.
+  for GitHub Code Scanning and SonarQube.
   Requires actions/checkout to have run in the calling job.
   Job must declare security-events: write when upload-sarif is true.
 
