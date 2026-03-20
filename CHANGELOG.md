@@ -24,3 +24,8 @@ Format basiert auf [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 - `.github/actions/html-validate`: GitHub Composite Action für HTML-Validierung via Python's HTMLParser — konfigurierbarer Dateipfad
 - `.github/actions/python-test`: GitHub Composite Action für die vollständige Python-Test-Pipeline — setup-python, pip install, pytest mit JUnit-XML + Coverage-XML, Artefakt-Upload
 - `.github/actions/go-build`: GitHub Composite Action für plattformübergreifende Go-Binary-Builds — GOOS/GOARCH/GOARM als Inputs, kompatibel mit Matrix-Jobs; ersetzt inline build-cli und build-tui in beaglebone_black
+
+### Changed (Issue #3)
+
+- `go-test`: JUnit → SARIF Konvertierung via `junit2sarif` + Upload zu GitHub Code Scanning (`upload-sarif` Input, default true; erfordert `security-events: write`)
+- `python-test`: JUnit → SARIF Konvertierung via `junit2sarif` + Upload zu GitHub Code Scanning (`upload-sarif` Input, default true; erfordert `security-events: write`)

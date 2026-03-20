@@ -1,8 +1,10 @@
 name: Python Test Pipeline
 description: >
   Full Python test pipeline: setup Python, install dependencies,
-  run pytest with JUnit XML + coverage reports, upload artifact.
+  run pytest with JUnit XML + coverage reports, optionally convert
+  JUnit → SARIF and upload to GitHub Code Scanning, upload artifact.
   Requires actions/checkout to have run in the calling job.
+  Job must declare security-events: write when upload-sarif is true.
 
 inputs:
   python-version:
@@ -45,6 +47,16 @@ inputs:
     required: false
     default: '30'
 
+  upload-sarif:
+    description: Convert JUnit XML → SARIF and upload to GitHub Code Scanning ('true'/'false'). Requires security-events:write in the calling job.
+    required: false
+    default: 'true'
+
+  sarif-category:
+    description: Category label for the SARIF upload.
+    required: false
+    default: python-tests
+
 runs:
   using: composite
   steps:
@@ -66,6 +78,21 @@ runs:
           --cov=${{ inputs.coverage-src }} \
           --cov-report=xml:${{ inputs.coverage-xml }} \
           --cov-report=term
+
+    - name: Convert Python JUnit → SARIF
+      if: inputs.upload-sarif == 'true'
+      shell: bash
+      run: |
+        pip install junit2sarif --quiet
+        junit2sarif ${{ inputs.junit-xml }} -o reports/python-tests.sarif
+
+    - name: Upload Python Test SARIF to GitHub Code Scanning
+      if: inputs.upload-sarif == 'true'
+      continue-on-error: true
+      uses: github/codeql-action/upload-sarif@v3
+      with:
+        sarif_file: reports/python-tests.sarif
+        category: ${{ inputs.sarif-category }}
 
     - name: Upload Python reports
       if: inputs.artifact-name != ''
