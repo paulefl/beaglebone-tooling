@@ -50,6 +50,7 @@ def fetch_issues(host, token, project_key, severities, types, max_issues=500):
             "componentKeys": project_key,
             "severities": severities,
             "types": types,
+            "statuses": "OPEN",
             "ps": page_size,
             "p": page,
             "s": "SEVERITY",
@@ -200,3 +201,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
