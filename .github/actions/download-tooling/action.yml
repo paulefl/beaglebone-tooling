@@ -25,16 +25,23 @@ runs:
         GH_TOKEN: ${{ env.GH_TOKEN || env.GITHUB_TOKEN }}
       run: |
         mkdir -p "${{ inputs.dest }}"
-        if [ -n "${{ inputs.version }}" ]; then
-          gh release download "${{ inputs.version }}" \
-            --repo paulefl/beaglebone-tooling \
-            --pattern "tooling-*.tar.gz" \
-            --dir /tmp/tooling-dl
-        else
-          gh release download \
-            --repo paulefl/beaglebone-tooling \
-            --pattern "tooling-*.tar.gz" \
-            --dir /tmp/tooling-dl
-        fi
+        # Retry loop — guards against race condition where the release tarball
+        # is not yet uploaded when this step runs (CI uploads ~20s after tag).
+        for attempt in 1 2 3 4 5; do
+          rm -rf /tmp/tooling-dl && mkdir -p /tmp/tooling-dl
+          if [ -n "${{ inputs.version }}" ]; then
+            gh release download "${{ inputs.version }}" \
+              --repo paulefl/beaglebone-tooling \
+              --pattern "tooling-*.tar.gz" \
+              --dir /tmp/tooling-dl && break
+          else
+            gh release download \
+              --repo paulefl/beaglebone-tooling \
+              --pattern "tooling-*.tar.gz" \
+              --dir /tmp/tooling-dl && break
+          fi
+          echo "⏳ Attempt ${attempt}/5 failed — waiting 15s for tarball upload..."
+          sleep 15
+        done
         tar xf /tmp/tooling-dl/tooling-*.tar.gz -C "${{ inputs.dest }}"
         chmod +x "${{ inputs.dest }}"/*.sh "${{ inputs.dest }}"/bausteinsicht
