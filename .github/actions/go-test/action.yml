@@ -121,8 +121,8 @@ runs:
       if: inputs.upload-sarif == 'true'
       shell: bash
       run: |
-        pip install junit2sarif --quiet
-        junit2sarif reports/go-tests-junit.xml -o reports/go-tests.sarif
+        python3 "$GITHUB_ACTION_PATH/../../../junit_to_sarif.py" \
+          reports/go-tests-junit.xml reports/go-tests.sarif go-tests
 
     - name: Upload Go Test SARIF to GitHub Code Scanning
       if: inputs.upload-sarif == 'true'
