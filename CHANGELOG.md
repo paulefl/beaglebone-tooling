@@ -20,3 +20,7 @@ Format basiert auf [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 - `.github/actions/strictdoc`: GitHub Composite Action für den vollständigen StrictDoc-Export — Python-Setup, StrictDoc + Test-Deps, Pytest JUnit-XML, Chrome-Check, make req-tracing, req_tracing_summary.py, HTML/PDF/Excel/ReqIF Artefakt-Upload
 - `.github/actions/test-report`: GitHub Composite Action für den vollständigen Test-Report + GitHub Pages Deploy — Trend-Cache, trend_summary.py, generate_reports.py, reports-Branch-Persistenz und Pages-Deployment
 - `.github/actions/sonarcloud`: GitHub Composite Action für SonarCloud Analysis — lädt alle Coverage- und SARIF-Artefakte, arrangiert C-Reports, führt Scan durch; erweiterbar für künftige SARIF-Reports (#5–#8, #9)
+- `.github/actions/go-lint`: GitHub Composite Action für Go Linting — kapselt setup-go und `make lint`; ersetzt inline lint-go-Job in beaglebone_black
+- `.github/actions/html-validate`: GitHub Composite Action für HTML-Validierung via Python's HTMLParser — konfigurierbarer Dateipfad
+- `.github/actions/python-test`: GitHub Composite Action für die vollständige Python-Test-Pipeline — setup-python, pip install, pytest mit JUnit-XML + Coverage-XML, Artefakt-Upload
+- `.github/actions/go-build`: GitHub Composite Action für plattformübergreifende Go-Binary-Builds — GOOS/GOARCH/GOARM als Inputs, kompatibel mit Matrix-Jobs; ersetzt inline build-cli und build-tui in beaglebone_black

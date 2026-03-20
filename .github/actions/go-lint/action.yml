@@ -1,0 +1,28 @@
+name: Go Lint
+description: >
+  Runs golangci-lint (via make lint) for a Go module.
+  Requires actions/checkout to have run in the calling job.
+
+inputs:
+  go-version:
+    description: Go version (passed to actions/setup-go).
+    required: false
+    default: '1.23'
+
+  working-directory:
+    description: Directory to run make lint in (must contain go.mod).
+    required: false
+    default: '.'
+
+runs:
+  using: composite
+  steps:
+    - name: Setup Go
+      uses: actions/setup-go@v6
+      with:
+        go-version: ${{ inputs.go-version }}
+
+    - name: Lint
+      shell: bash
+      working-directory: ${{ inputs.working-directory }}
+      run: make lint

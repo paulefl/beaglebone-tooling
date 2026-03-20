@@ -1,0 +1,78 @@
+name: Python Test Pipeline
+description: >
+  Full Python test pipeline: setup Python, install dependencies,
+  run pytest with JUnit XML + coverage reports, upload artifact.
+  Requires actions/checkout to have run in the calling job.
+
+inputs:
+  python-version:
+    description: Python version.
+    required: false
+    default: '3.12'
+
+  requirements-dev:
+    description: Path to requirements-dev.txt.
+    required: false
+    default: tests/requirements-dev.txt
+
+  test-path:
+    description: Path to pytest test directory.
+    required: false
+    default: tests/api/
+
+  junit-xml:
+    description: Path for JUnit XML output.
+    required: false
+    default: reports/pytest-junit.xml
+
+  coverage-xml:
+    description: Path for coverage XML output.
+    required: false
+    default: reports/python-coverage.xml
+
+  coverage-src:
+    description: Source path for --cov flag.
+    required: false
+    default: tests/api
+
+  artifact-name:
+    description: Name of the uploaded reports artifact (empty = no upload).
+    required: false
+    default: python-reports
+
+  retention-days:
+    description: Artifact retention in days.
+    required: false
+    default: '30'
+
+runs:
+  using: composite
+  steps:
+    - name: Setup Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ inputs.python-version }}
+
+    - name: Install dependencies
+      shell: bash
+      run: pip install -r ${{ inputs.requirements-dev }} pytest-cov
+
+    - name: Run Tests
+      shell: bash
+      run: |
+        mkdir -p reports
+        pytest ${{ inputs.test-path }} -v --timeout=10 \
+          --junitxml=${{ inputs.junit-xml }} \
+          --cov=${{ inputs.coverage-src }} \
+          --cov-report=xml:${{ inputs.coverage-xml }} \
+          --cov-report=term
+
+    - name: Upload Python reports
+      if: inputs.artifact-name != ''
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ inputs.artifact-name }}
+        path: |
+          ${{ inputs.junit-xml }}
+          ${{ inputs.coverage-xml }}
+        retention-days: ${{ inputs.retention-days }}
