@@ -64,8 +64,12 @@ inputs:
     required: false
     default: python-sarif
 
+  rust-sarif-artifact:
+    description: Artifact name for Rust Lint SARIF / clippy (empty = skip). (#6)
+    required: false
+    default: rust-sarif
+
   # c-sarif-artifact:       feat: SARIF Report für C — clang-tidy (#7)
-  # rust-sarif-artifact:    feat: SARIF Report für Rust — clippy (#6)
   # rust-coverage-artifact: feat: Rust Coverage — cargo-llvm-cov (#9)
 
 runs:
@@ -129,7 +133,15 @@ runs:
         path: reports/
       continue-on-error: true
 
-    # Future downloads go here as issues #6–#8, #9 are implemented.
+    - name: Download Rust Lint SARIF
+      if: inputs.rust-sarif-artifact != ''
+      uses: actions/download-artifact@v4
+      with:
+        name: ${{ inputs.rust-sarif-artifact }}
+        path: reports/
+      continue-on-error: true
+
+    # Future downloads go here as issues #7–#8, #9 are implemented.
 
     # ── SonarCloud Scan ─────────────────────────────────────────────────────
     - name: SonarCloud Scan
