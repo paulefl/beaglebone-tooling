@@ -138,12 +138,6 @@ build_adoc() {
     if [[ "$formats" == *"pdf"* ]]; then
         log "  → PDF wird gebaut..."
 
-        # PDF Theme Datei
-        local pdf_theme_arg=""
-        if [[ "$theme" == "dark" ]]; then
-            pdf_theme_arg="-a pdf-theme=default-with-fallback-font"
-        fi
-
         local pdf_args=(
             "${common_args[@]}"
             "-b" "pdf"
@@ -151,6 +145,9 @@ build_adoc() {
             "-a" "pdf-fontsdir=GEM_FONTS_DIR"
             "-o" "${out_dir}/${base}.pdf"
         )
+        if [[ "$theme" == "dark" ]]; then
+            pdf_args+=("-a" "pdf-theme=default-with-fallback-font")
+        fi
 
         if asciidoctor-pdf "${pdf_args[@]}" "$adoc_file" 2>&1; then
             success "  ✅ PDF:  ${out_dir}/${base}.pdf ($(

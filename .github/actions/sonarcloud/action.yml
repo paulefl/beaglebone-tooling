@@ -10,6 +10,13 @@ inputs:
     description: SonarCloud token (SONAR_TOKEN secret).
     required: true
 
+  qualitygate-wait:
+    description: >
+      Wait for Quality Gate result and fail if new issues are introduced.
+      Set to 'true' to block merges when new SonarQube issues are found.
+    required: false
+    default: 'true'
+
   # ── Coverage Artifacts ──────────────────────────────────────────────────
   go-reports-artifact:
     description: Artifact name for Go reports (empty = skip).
@@ -186,6 +193,9 @@ runs:
         args : > 
           -X 
       continue-on-error: true
+      with:
+        args: >
+          -Dsonar.qualitygate.wait=${{ inputs.qualitygate-wait }}
       env:
         GITHUB_TOKEN: ${{ env.GITHUB_TOKEN }}
         SONAR_TOKEN:  ${{ inputs.sonar-token }}
@@ -209,3 +219,4 @@ runs:
         else
           echo "✅ SonarCloud Scan erfolgreich"
         fi
+
