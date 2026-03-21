@@ -182,6 +182,9 @@ runs:
     - name: SonarCloud Scan
       id: sonar
       uses: SonarSource/sonarqube-scan-action@v6
+      with:
+        args : > 
+          -X 
       continue-on-error: true
       env:
         GITHUB_TOKEN: ${{ env.GITHUB_TOKEN }}
