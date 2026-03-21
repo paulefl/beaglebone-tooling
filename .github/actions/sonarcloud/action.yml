@@ -189,13 +189,11 @@ runs:
     - name: SonarCloud Scan
       id: sonar
       uses: SonarSource/sonarqube-scan-action@v6
-      with:
-        args : > 
-          -X 
       continue-on-error: true
       with:
         args: >
           -Dsonar.qualitygate.wait=${{ inputs.qualitygate-wait }}
+          -X 
       env:
         GITHUB_TOKEN: ${{ env.GITHUB_TOKEN }}
         SONAR_TOKEN:  ${{ inputs.sonar-token }}
