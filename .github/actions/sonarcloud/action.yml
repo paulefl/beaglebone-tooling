@@ -189,6 +189,9 @@ runs:
     - name: SonarCloud Scan
       id: sonar
       uses: SonarSource/sonarqube-scan-action@v6
+      with:
+        args : > 
+          -X 
       continue-on-error: true
       with:
         args: >
